@@ -133,41 +133,31 @@
       processPhotoLink(link);
     });
 
-          // Function to send link to n8n webhook
-    async function processPhotoLink(link) {
-      try {
-        // Determine if it's an album or single photo link
-        const isAlbum = link.includes('/share/') && !link.includes('?photo=');
-        const endpoint = isAlbum 
-          ? 'https://n8n.yourdomain.com/webhook/google-album-link'
-          : 'https://n8n.yourdomain.com/webhook/google-photo-link';
-        
-        const payload = isAlbum 
-          ? { albumLink: link }
-          : { photoLink: link };
-        
-        const response = await fetch(endpoint, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(payload)
-        });
-        
-        if (!response.ok) {
-          throw new Error('Failed to process ' + (isAlbum ? 'album' : 'photo'));
-        }
-        
-        const result = await response.json();
-        showStatus(isAlbum 
-          ? 'Album processing started! This may take a while for multiple photos.' 
-          : 'Photo processing started successfully!');
-        document.getElementById('photoLink').value = '';
-      } catch (error) {
-        showStatus(`Error: ${error.message}`, true);
-        console.error('Error:', error);
-      }
+// Function to send album link to n8n webhook
+async function processAlbumLink(link) {
+  try {
+    showStatus('Album processing started! This may take a while for multiple photos.');
+    
+    const response = await fetch('https://n8n.yourdomain.com/webhook/album-processor', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ albumLink: link })
+    });
+    
+    if (!response.ok) {
+      throw new Error('Failed to process album');
     }
+    
+    const result = await response.json();
+    showStatus(`Album processing in progress. ${result.photoCount || 'Multiple'} photos will be processed.`);
+    document.getElementById('albumLink').value = '';
+  } catch (error) {
+    showStatus(`Error: ${error.message}`, true);
+    console.error('Error:', error);
+  }
+}
 
     // Check if this page was opened via share target
     window.addEventListener('DOMContentLoaded', () => {
