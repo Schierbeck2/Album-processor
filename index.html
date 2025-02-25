@@ -203,6 +203,13 @@
       const urlParams = new URLSearchParams(window.location.search);
       const sharedLink = urlParams.get('link');
       const sharedText = urlParams.get('text');
+      const error = urlParams.get('error');
+
+      // Handle share target error
+      if (error === 'share-failed') {
+        showStatus('Failed to process shared content', true);
+        return;
+      }
 
       // Look for Google Photos link in shared content
       if (sharedLink && sharedLink.includes('photos.google.com')) {
